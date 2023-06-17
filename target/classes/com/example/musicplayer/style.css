@@ -1,0 +1,42 @@
+.body {
+    -fx-background-color: #afafaf;
+}
+
+.text {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.tile {
+    -fx-margin: 10px;
+    -fx-background-color: #f0f0f0;
+    -fx-background-radius: 7px;
+    -fx-border-color: #9a9cb1;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+}
+.tile:hover {
+    -fx-background-color: #e6e6e6;
+    -fx-cursor: hand;
+}
+.tile:pressed  {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+.custom-slider .track {
+    -fx-background-color: gray;
+}
+
+.custom-slider .track-background {
+    -fx-background-color: black;
+}
+
+
+.songList {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+}
+
+
