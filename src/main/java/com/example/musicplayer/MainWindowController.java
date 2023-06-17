@@ -15,10 +15,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.io.File;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 
@@ -46,26 +45,33 @@ public class MainWindowController implements Initializable {
     private TimerTask task;
     private boolean running;
 
+    private static final String DIRECTORY_PATH = "music";
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         running = false;
         songs = new ArrayList<File>();
-        directory = new File("music");
-        files = directory.listFiles();
-
+        //directory = new File("music");
+        //files = directory.listFiles();
+/*
         if(files != null){
             for(File file : files){
                 System.out.println(file);
                 songs.add(file);
             }
 
-        }
+        }*/
+        songs = SongsFileManager.loadSongsFromDirectory(DIRECTORY_PATH);
 
-        media = new Media(songs.get(songNumber).toURI().toString());
-        mediaPlayer = new MediaPlayer(media);
+        loadSong();
+        setBarListeners();
 
-        songLabel.setText(songs.get(songNumber).getName());
+        for( File file : songs)
+            songList.getChildren().add(new ListItemGridPane(file.getName()));
 
+    }
+
+    private void setBarListeners(){
         volumeSlider.valueProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> arg0, Number arg1, Number arg2) {
@@ -92,14 +98,6 @@ public class MainWindowController implements Initializable {
             Duration seekTime = Duration.seconds(progress * media.getDuration().toSeconds());
             mediaPlayer.seek(seekTime);
         });
-
-        ListItemGridPane listItemGridPane = new ListItemGridPane("aaaaaa");
-        songList.getChildren().add(listItemGridPane);
-
-        ListItemGridPane listItemGridPane2 = new ListItemGridPane("aaaaaaaaaaaaaaaaaaaaaa");
-        songList.getChildren().add(listItemGridPane2);
-
-
     }
 
 
@@ -149,6 +147,9 @@ public class MainWindowController implements Initializable {
     }
 
     public void playAndPauseButtonAction(){
+            if(songs.isEmpty())
+                return;
+
             if(running) {
                 playAndPauseButton.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/musicplayer/images/play.png"))));
                 running = false;

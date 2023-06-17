@@ -18,7 +18,10 @@ import java.util.Objects;
 
 public class ListItemGridPane extends GridPane {
 
+    private Text textNode;
+    private String title;
     public ListItemGridPane(String title) {
+        this.title = title;
         // Ustawienia kolumn
         ColumnConstraints column1 = new ColumnConstraints(50); // prefWidth=50.0
         ColumnConstraints column2 = new ColumnConstraints(); // hgrow=ALWAYS
@@ -27,7 +30,7 @@ public class ListItemGridPane extends GridPane {
         getColumnConstraints().addAll(column1, column2, column3);
 
         // Ustawienia wierszy
-        RowConstraints row1 = new RowConstraints(50); // prefHeight=50.0
+        RowConstraints row1 = new RowConstraints(60); // prefHeight=60.0
         row1.setValignment(javafx.geometry.VPos.CENTER);
         getRowConstraints().add(row1);
 
@@ -43,16 +46,25 @@ public class ListItemGridPane extends GridPane {
                 createImageView("/com/example/musicplayer/images/speaker.png"),
                 createImageView("/com/example/musicplayer/images/speaker.png")
         );
-        add(vBox, 2, 0); // Dodanie VBox do kolumny 2
+        add(vBox, 2, 0);
 
         // Tworzenie tekstu
-        TextFlow textFlow = createTextFlow(title);
-        add(textFlow, 1, 0); // Dodanie TextFlow do kolumny 1
+        TextFlow textFlow = createTextFlow();
+        add(textFlow, 1, 0);
 
-        LetterCircle letterCircle = new LetterCircle(title.charAt(0), 20);
+        LetterCircle letterCircle = new LetterCircle(this.title.charAt(0), 20);
         add(letterCircle, 0,0 );
         // Włączanie widoczności linii siatki (opcjonalne)
         setGridLinesVisible(true);
+
+        widthProperty().addListener((observable, oldValue, newValue) -> {
+            int characters = (int) (widthProperty().get() / 10) + 6;
+            //System.out.println("Szerokość: "+ widthProperty().get());
+            //System.out.println("characters: "+ characters);
+            String truncatedText = title.length() > characters ? title.substring(0, characters) : title;
+            textNode.setText(truncatedText);
+        });
+
     }
 
     private ImageView createImageView(String imageUrl) {
@@ -66,24 +78,23 @@ public class ListItemGridPane extends GridPane {
     }
 
 
-    private TextFlow createTextFlow(String text) {
+    private TextFlow createTextFlow() {
         TextFlow textFlow = new TextFlow();
         textFlow.setPadding(new Insets(5, 10, 0, 10));
-        Text textNode = new Text();
+        textNode = new Text();
         textNode.setFont(new Font(20));
         textNode.setBoundsType(TextBoundsType.VISUAL);
         textNode.setTextAlignment(TextAlignment.LEFT);
         textNode.setWrappingWidth(USE_PREF_SIZE);
 
-        // Ograniczenie tekstu do określonej liczby znaków (np. 10)
-        int maxCharacters = (int) textFlow.getWidth()/ 10;
-        System.out.println("maxCharacters: "+maxCharacters);
-        String truncatedText = text.length() > maxCharacters ? text.substring(0, maxCharacters) : text;
+        int maxCharacters = 20;
+        String truncatedText = title.length() > maxCharacters ? title.substring(0, maxCharacters) : title;
         textNode.setText(truncatedText);
 
         textFlow.getChildren().add(textNode);
         return textFlow;
     }
+
 
 
 }
