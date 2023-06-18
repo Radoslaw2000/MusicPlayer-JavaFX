@@ -20,8 +20,14 @@ public class ListItemGridPane extends GridPane {
 
     private Text textNode;
     private String title;
-    public ListItemGridPane(String title) {
+
+    private ImageView up, down;
+    private int index;
+
+    public ListItemGridPane(String title, int index ) {
         this.title = title;
+        this.index= index;
+
         // Ustawienia kolumn
         ColumnConstraints column1 = new ColumnConstraints(50); // prefWidth=50.0
         ColumnConstraints column2 = new ColumnConstraints(); // hgrow=ALWAYS
@@ -42,10 +48,9 @@ public class ListItemGridPane extends GridPane {
         vBox.setAlignment(Pos.CENTER);
         vBox.setSpacing(5);
         vBox.setPrefHeight(50);
-        vBox.getChildren().addAll(
-                createImageView("/com/example/musicplayer/images/speaker.png"),
-                createImageView("/com/example/musicplayer/images/speaker.png")
-        );
+        up = createImageView("/com/example/musicplayer/images/up.png");
+        down = createImageView("/com/example/musicplayer/images/down.png");
+        vBox.getChildren().addAll(up, down);
         add(vBox, 2, 0);
 
         // Tworzenie tekstu
@@ -59,9 +64,7 @@ public class ListItemGridPane extends GridPane {
 
         widthProperty().addListener((observable, oldValue, newValue) -> {
             int characters = (int) (widthProperty().get() / 10) + 6;
-            //System.out.println("Szerokość: "+ widthProperty().get());
-            //System.out.println("characters: "+ characters);
-            String truncatedText = title.length() > characters ? title.substring(0, characters) : title;
+            String truncatedText = title.length() > characters ? title.substring(0, characters)  + "..." : title;
             textNode.setText(truncatedText);
         });
 
@@ -73,6 +76,7 @@ public class ListItemGridPane extends GridPane {
         imageView.setFitHeight(20);
         imageView.setPreserveRatio(true);
         imageView.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream(imageUrl))));
+        imageView.getStyleClass().add("tile");
 
         return imageView;
     }
@@ -95,6 +99,25 @@ public class ListItemGridPane extends GridPane {
         return textFlow;
     }
 
+    public ImageView getUp() {
+        return up;
+    }
+
+    public ImageView getDown() {
+        return down;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public String getTitle(){
+        return  title;
+    }
 
 
 }

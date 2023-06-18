@@ -8,9 +8,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -27,7 +25,7 @@ public class MainWindowController implements Initializable {
     @FXML
     private Text songLabel, currentTime, endTime;
     @FXML
-    private ImageView playAndPauseButton, previousButton, nextButton;
+    private ImageView playAndPauseButton;
 
     @FXML
     private VBox songList;
@@ -35,40 +33,42 @@ public class MainWindowController implements Initializable {
 
     private Media media;
     private MediaPlayer mediaPlayer;
-
-    private File directory;
-    private File[] files;
-    private ArrayList<File> songs;
-
     private int songNumber;
     private Timer timer;
     private TimerTask task;
     private boolean running;
 
-    private static final String DIRECTORY_PATH = "music";
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         running = false;
-        songs = new ArrayList<File>();
-        //directory = new File("music");
-        //files = directory.listFiles();
-/*
-        if(files != null){
-            for(File file : files){
-                System.out.println(file);
-                songs.add(file);
-            }
+        Settings.getInstance().setSongs( SongsFileManager.loadSongsFromDirectory("music") );
 
-        }*/
-        songs = SongsFileManager.loadSongsFromDirectory(DIRECTORY_PATH);
+        if(Settings.getInstance().getSongs().isEmpty()){
+            System.out.println("pusto");
+            return;
+        }
 
-        loadSong();
+        loadSongToMediaPlayer();
         setBarListeners();
 
-        for( File file : songs)
-            songList.getChildren().add(new ListItemGridPane(file.getName()));
+        fillSongList();
 
+
+
+    }
+
+    void fillSongList(){
+        for (File file : Settings.getInstance().getSongs()) {
+            int index = songList.getChildren().size(); // Pobierz indeks przed dodaniem elementu do listy
+            ListItemGridPane li = new ListItemGridPane(file.getName(), index);
+            li.getUp().setOnMouseClicked(event2 -> {
+                System.out.println("aaa");
+            });
+            funcja(li, index); // Przekaż indeks jako argument
+            songList.getChildren().add(li);
+
+        }
     }
 
     private void setBarListeners(){
@@ -111,6 +111,8 @@ public class MainWindowController implements Initializable {
 
     @FXML
     public void handleDragDropped(DragEvent event) {
+        boolean wasEmpty = Settings.getInstance().getSongs().isEmpty();
+
         FileHandler fh = new FileHandler();
         Dragboard dragboard = event.getDragboard();
         if (!dragboard.hasFiles())
@@ -119,14 +121,26 @@ public class MainWindowController implements Initializable {
         List<File> files = dragboard.getFiles();
         for (File file : files) {
             if(fh.canBeAdded(file)){
-                songs.add(file);
-                songList.getChildren().add(new ListItemGridPane(file.getName()));
+                Settings.getInstance().addSong(file);
+
+                int index = songList.getChildren().size();
+                ListItemGridPane li = new ListItemGridPane(file.getName(), index);
+                li.getUp().setOnMouseClicked(event2 -> {
+                    System.out.println("aaa");
+                });
+                songList.getChildren().add(li);
             }
 
         }
 
         event.setDropCompleted(true);
         event.consume();
+
+        if(wasEmpty){
+            loadSongToMediaPlayer();
+            setBarListeners();
+
+        }
     }
 
 
@@ -147,7 +161,7 @@ public class MainWindowController implements Initializable {
     }
 
     public void playAndPauseButtonAction(){
-            if(songs.isEmpty())
+            if(Settings.getInstance().getSongs().isEmpty())
                 return;
 
             if(running) {
@@ -165,12 +179,20 @@ public class MainWindowController implements Initializable {
 
     }
 
-    private void loadSong(){
-        media = new Media(songs.get(songNumber).toURI().toString());
+    private void loadSongToMediaPlayer(){
+        media = new Media(Settings.getInstance().getSong(songNumber).toURI().toString());
         mediaPlayer = new MediaPlayer(media);
-        songLabel.setText(songs.get(songNumber).getName());
+        songLabel.setText(Settings.getInstance().getSong(songNumber).getName());
+        mediaPlayer.setOnReady(() -> {
+            Duration duration = media.getDuration();
+            String endTimeString = formatTime(duration);
+            Platform.runLater(() -> endTime.setText(endTimeString));
+        });
     }
     public void previousButtonAction(){
+        if(Settings.getInstance().getSongs().isEmpty())
+            return;
+
         mediaPlayer.stop();
         cancelTimer();
         System.out.println("Stopped");
@@ -178,25 +200,28 @@ public class MainWindowController implements Initializable {
         if(songNumber > 0)
             songNumber--;
         else
-            songNumber = songs.size() - 1;
+            songNumber = Settings.getInstance().getSongs().size() - 1;
 
-        loadSong();
+        loadSongToMediaPlayer();
         if(!running)
             playAndPauseButtonAction();
     }
 
 
     public void nextButtonAction(){
+        if(Settings.getInstance().getSongs().isEmpty())
+            return;
+
         mediaPlayer.stop();
         cancelTimer();
         System.out.println("Stopped");
 
-        if(songNumber < songs.size() - 1)
+        if(songNumber < Settings.getInstance().getSongs().size() - 1)
             songNumber++;
         else
             songNumber = 0;
 
-        loadSong();
+        loadSongToMediaPlayer();
         if(!running)
             playAndPauseButtonAction();
     }
@@ -217,10 +242,8 @@ public class MainWindowController implements Initializable {
                     cancelTimer();
 
                 String currentTimeString = formatTime(currentDuration);
-                String endTimeString = formatTime(endDuration);
                 Platform.runLater(() -> {
                     currentTime.setText(currentTimeString);
-                    endTime.setText(endTimeString);
                 });
             }
         };
@@ -240,6 +263,73 @@ public class MainWindowController implements Initializable {
             timer.cancel();
         }
     }
+
+
+
+    void funcja(ListItemGridPane li, int index) {
+        // Dodawanie obsługi zdarzeń przeciągania i upuszczania
+        li.setOnDragDetected(dragEvent -> {
+            /* Utwórz ClipboardContent i ustaw odpowiednie dane, na przykład indeks elementu lub same dane */
+            Dragboard dragboard = li.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.putString(Integer.toString(index));
+            System.out.println("index: " + index);
+            dragboard.setContent(content);
+            dragEvent.consume();
+        });
+        li.setOnDragOver(dragEvent -> {
+            /* Sprawdź, czy przeciągane dane są obsługiwane */
+            if (dragEvent.getDragboard().hasString()) {
+                dragEvent.acceptTransferModes(TransferMode.MOVE);
+            }
+            dragEvent.consume();
+        });
+        li.setOnDragEntered(dragEvent -> {
+            /* Zastosuj efekt wizualny, na przykład zmiana koloru tła */
+            li.setStyle("-fx-background-color: lightblue;");
+            dragEvent.consume();
+        });
+        li.setOnDragExited(dragEvent -> {
+            /* Przywróć domyślny efekt wizualny */
+            li.setStyle("-fx-background-color: transparent;");
+            dragEvent.consume();
+        });
+        li.setOnDragDropped(dragEvent -> {
+            /* Pobierz dane przeciąganej pozycji */
+            Dragboard dragboard = dragEvent.getDragboard();
+            boolean success = false;
+
+            if (dragboard.hasString()) {
+                int draggedIndex = Integer.parseInt(dragboard.getString());
+                int targetIndex = index; // Użyj indeksu przekazanego jako argument metody
+                System.out.println("draggedIndex: " + draggedIndex);
+                System.out.println("targetIndex: " + targetIndex);
+
+                if (draggedIndex != targetIndex) {
+                    Settings.getInstance().swapSongs(draggedIndex, targetIndex);
+                    success = true;
+                    if(songNumber == draggedIndex)
+                        songNumber = targetIndex;
+                    else if(songNumber == targetIndex)
+                        songNumber = draggedIndex;
+                }
+            }
+            dragEvent.setDropCompleted(success);
+            dragEvent.consume();
+        });
+        li.setOnDragDone(dragEvent -> {
+            /* Przywróć domyślny efekt wizualny */
+            li.setStyle("-fx-background-color: transparent;");
+            dragEvent.consume();
+            songList.getChildren().clear();
+            fillSongList();
+            System.out.println("zmieniono");
+        });
+
+
+    }
+
+
 
 
 }

@@ -14,12 +14,15 @@ public class SongsFileManager {
             try {
                 String destinationPath = directoryPath + "/" + song.getName();
                 File destinationFile = new File(destinationPath);
-                copyFile(song, destinationFile);
+                if (!destinationFile.exists()) {
+                    copyFile(song, destinationFile);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
+
 
     public static ArrayList<File> loadSongsFromDirectory(String directoryPath) {
         ArrayList<File> songs = new ArrayList<>();

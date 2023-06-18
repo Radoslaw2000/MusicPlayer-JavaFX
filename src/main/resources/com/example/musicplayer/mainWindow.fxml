@@ -100,7 +100,7 @@
             <Insets left="10.0" right="10.0" />
          </GridPane.margin>
       </GridPane>
-      <Text fx:id="songLabel" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" textAlignment="CENTER" wrappingWidth="696.5367984771729" GridPane.halignment="CENTER" GridPane.rowIndex="3">
+      <Text fx:id="songLabel" strokeType="OUTSIDE" strokeWidth="0.0" text="Brak utworów" textAlignment="CENTER" wrappingWidth="696.5367984771729" GridPane.halignment="CENTER" GridPane.rowIndex="3">
          <font>
             <Font size="40.0" />
          </font>
@@ -114,8 +114,8 @@
           <RowConstraints vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Text fx:id="currentTime" strokeType="OUTSIDE" strokeWidth="0.0" text="0:00" wrappingWidth="70.0" GridPane.valignment="TOP" />
-            <Text fx:id="endTime" strokeType="OUTSIDE" strokeWidth="0.0" text="0:00" textAlignment="RIGHT" wrappingWidth="70.0" GridPane.columnIndex="1" GridPane.valignment="TOP" />
+            <Text fx:id="currentTime" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00" wrappingWidth="70.0" GridPane.valignment="TOP" />
+            <Text fx:id="endTime" strokeType="OUTSIDE" strokeWidth="0.0" text="00:00" textAlignment="RIGHT" wrappingWidth="70.0" GridPane.columnIndex="1" GridPane.valignment="TOP" />
          </children>
          <opaqueInsets>
             <Insets />
