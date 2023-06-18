@@ -9,8 +9,13 @@ public class Settings {
 
     private ArrayList<File> songs;
 
+    private boolean looped, random, muted;
+
     private Settings() {
         songs = new ArrayList<>();
+        looped = false;
+        random = false;
+        muted = false;
     }
 
     public static Settings getInstance() {
@@ -22,6 +27,30 @@ public class Settings {
             }
         }
         return instance;
+    }
+
+    public boolean isLooped() {
+        return looped;
+    }
+
+    public void setLooped(boolean looped) {
+        this.looped = looped;
+    }
+
+    public boolean isRandom() {
+        return random;
+    }
+
+    public void setRandom(boolean random) {
+        this.random = random;
+    }
+
+    public boolean isMuted() {
+        return muted;
+    }
+
+    public void setMuted(boolean muted) {
+        this.muted = muted;
     }
 
     public ArrayList<File> getSongs() {
@@ -43,4 +72,6 @@ public class Settings {
     public void swapSongs(int index1, int index2) {
         Collections.swap(Settings.getInstance().getSongs(), index1, index2);
     }
+
+
 }

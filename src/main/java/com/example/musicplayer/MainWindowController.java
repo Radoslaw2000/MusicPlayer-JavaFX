@@ -25,7 +25,7 @@ public class MainWindowController implements Initializable {
     @FXML
     private Text songLabel, currentTime, endTime;
     @FXML
-    private ImageView playAndPauseButton;
+    private ImageView playAndPauseButton, muteButton, randomButton, loopButton;
 
     @FXML
     private VBox songList;
@@ -53,7 +53,6 @@ public class MainWindowController implements Initializable {
         setBarListeners();
 
         fillSongList();
-
 
 
     }
@@ -185,6 +184,48 @@ public class MainWindowController implements Initializable {
 
     }
 
+    public void loopButtonAction(){
+        if(Settings.getInstance().isLooped()) {
+            loopButton.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/musicplayer/images/loop.png"))));
+            Settings.getInstance().setLooped(false);
+        }
+        else{
+            loopButton.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/musicplayer/images/loop2.png"))));
+            Settings.getInstance().setLooped(true);
+        }
+    }
+
+    public void muteButtonAction(){
+        if(Settings.getInstance().isMuted()) {
+            muteButton.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/musicplayer/images/speaker.png"))));
+            Settings.getInstance().setMuted(false);
+            mediaPlayer.setMute(false);
+        }
+        else{
+            muteButton.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/musicplayer/images/mute.png"))));
+            Settings.getInstance().setMuted(true);
+            mediaPlayer.setMute(true);
+        }
+    }
+
+    public void randomButtonAction(){
+        if(Settings.getInstance().isRandom()) {
+            randomButton.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/musicplayer/images/shuffle.png"))));
+            Settings.getInstance().setRandom(false);
+        }
+        else{
+            randomButton.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/musicplayer/images/shuffle2.png"))));
+            Settings.getInstance().setRandom(true);
+        }
+    }
+
+    private void randomizeIfIsRandom(){
+        if (Settings.getInstance().isRandom()) {
+            Random random = new Random();
+            songNumber = random.nextInt(Settings.getInstance().getSongs().size());
+        }
+    }
+
     private void loadSongToMediaPlayer(){
         media = new Media(Settings.getInstance().getSong(songNumber).toURI().toString());
         mediaPlayer = new MediaPlayer(media);
@@ -232,6 +273,16 @@ public class MainWindowController implements Initializable {
             playAndPauseButtonAction();
     }
 
+    private void nextTrack() {
+        int totalSongs = Settings.getInstance().getSongs().size();
+
+        if (Settings.getInstance().isLooped())
+            nextButtonAction();
+        else if (songNumber < totalSongs - 1)
+                nextButtonAction();
+    }
+
+
     public void beginTimer() {
         timer = new Timer();
         task = new TimerTask() {
@@ -246,9 +297,9 @@ public class MainWindowController implements Initializable {
 
                 if (currentSeconds / endSeconds == 1){
                     cancelTimer();
-                    nextButtonAction();
+                    randomizeIfIsRandom();
+                    nextTrack();
                 }
-
 
                 String currentTimeString = formatTime(currentDuration);
                 Platform.runLater(() -> {
@@ -337,6 +388,7 @@ public class MainWindowController implements Initializable {
 
 
     }
+
 
 
 
