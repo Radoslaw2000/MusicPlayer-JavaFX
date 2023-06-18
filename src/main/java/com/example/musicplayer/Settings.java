@@ -9,8 +9,6 @@ public class Settings {
 
     private ArrayList<File> songs;
 
-    public int draggedIndex;
-    public int targetIndex;
     private Settings() {
         songs = new ArrayList<>();
     }

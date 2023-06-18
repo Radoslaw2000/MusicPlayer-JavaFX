@@ -65,7 +65,7 @@ public class MainWindowController implements Initializable {
             li.getUp().setOnMouseClicked(event2 -> {
                 System.out.println("aaa");
             });
-            funcja(li, index); // Przekaż indeks jako argument
+            addDragEventsToListItem(li, index); // Przekaż indeks jako argument
             songList.getChildren().add(li);
 
         }
@@ -120,7 +120,7 @@ public class MainWindowController implements Initializable {
 
         List<File> files = dragboard.getFiles();
         for (File file : files) {
-            if(fh.canBeAdded(file)){
+            if (fh.canBeAdded(file)) {
                 Settings.getInstance().addSong(file);
 
                 int index = songList.getChildren().size();
@@ -128,20 +128,26 @@ public class MainWindowController implements Initializable {
                 li.getUp().setOnMouseClicked(event2 -> {
                     System.out.println("aaa");
                 });
+                addDragEventsToListItem(li, index); // Przypisz zdarzenia przeciągania i upuszczania
                 songList.getChildren().add(li);
             }
-
         }
 
         event.setDropCompleted(true);
         event.consume();
 
-        if(wasEmpty){
+        if (wasEmpty) {
             loadSongToMediaPlayer();
             setBarListeners();
+        }
 
+        // Przypisz ponownie zdarzenia przeciągania i upuszczania dla wszystkich elementów w songList
+        for (int i = 0; i < songList.getChildren().size(); i++) {
+            ListItemGridPane li = (ListItemGridPane) songList.getChildren().get(i);
+            addDragEventsToListItem(li, i);
         }
     }
+
 
 
 
@@ -238,8 +244,11 @@ public class MainWindowController implements Initializable {
                 songProgressBar.setMax(endSeconds);
                 songProgressBar.setValue(currentSeconds);
 
-                if (currentSeconds / endSeconds == 1)
+                if (currentSeconds / endSeconds == 1){
                     cancelTimer();
+                    nextButtonAction();
+                }
+
 
                 String currentTimeString = formatTime(currentDuration);
                 Platform.runLater(() -> {
@@ -266,7 +275,7 @@ public class MainWindowController implements Initializable {
 
 
 
-    void funcja(ListItemGridPane li, int index) {
+    void addDragEventsToListItem(ListItemGridPane li, int index) {
         // Dodawanie obsługi zdarzeń przeciągania i upuszczania
         li.setOnDragDetected(dragEvent -> {
             /* Utwórz ClipboardContent i ustaw odpowiednie dane, na przykład indeks elementu lub same dane */
